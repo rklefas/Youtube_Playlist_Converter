@@ -1,0 +1,4 @@
+[DEFAULT]
+BASEURL=https://www.youtube.com/watch?v=[id]
+[InternetShortcut]
+URL=https://www.youtube.com/watch?v=[id]
