@@ -3,11 +3,16 @@ from time import sleep
 import csv
 import pathlib
 import os
+from googleapiclient.discovery import build
+from slugify import slugify
+
 
 try:
 
 	for file in glob.glob(".\YouTube and YouTube Music\playlists\*.csv"):
-		print(file)
+		print('')
+		print('PLAYLIST', file)
+		print('')
 		sleep(2)
 		
 		folder = 'converted/' + pathlib.Path(file).stem
@@ -17,17 +22,32 @@ try:
 
 		with open(file, newline='') as csvfile:
 			csvlines = csv.reader(csvfile, delimiter=',')
-			
-			rownum = 0
+			rownum = None
 			for row in csvlines:
 			
-				rownum = rownum + 1
-				
-				if len(row) == 0 or rownum <= 4:
+				if len(row) == 0:
 					continue
+				elif row[0] == 'Video Id':
+					rownum = 0
+					continue
+				elif rownum == None:
+					continue
+				else:
+					rownum = rownum + 1
 					
-				outname = folder  + '/' + row[0] + '.url'
 				
+				service = build('youtube', 'v3', developerKey='AIzaSyDvYRoF6kVF3vChT5Z0N0XOSAtwMj_f1j4')
+				dataX = service.videos().list(part='snippet', id=row[0]).execute()
+				service.close()
+				
+				try:
+					tmp = slugify(dataX['items'][0]['snippet']['title']).replace('-', ' ')
+					tmp = tmp + ' - '
+					tmp = tmp + slugify(dataX['items'][0]['snippet']['channelTitle']).replace('-', ' ')
+					outname = folder  + '/' + tmp + '.url'
+				except Exception as e:
+					outname = folder  + '/VIDEO ' + row[0] + '.url'
+					
 				if os.path.isfile(outname):
 				
 					print('Found', outname)
@@ -43,6 +63,6 @@ try:
 					text_file.close()
 
 					print('Created', outname)
-					
-except Exception as e: 
-	print('Exception', e)
+
+except Exception as e:
+	raise Exception(e)
