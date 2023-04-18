@@ -5,9 +5,12 @@ import pathlib
 import os
 from googleapiclient.discovery import build
 from slugify import slugify
+import json
 
 
 try:
+
+	configs = json.load(open('./config.json', 'r'))
 
 	for file in glob.glob(".\YouTube and YouTube Music\playlists\*.csv"):
 		print('')
@@ -15,7 +18,7 @@ try:
 		print('')
 		sleep(2)
 		
-		folder = 'converted/' + pathlib.Path(file).stem
+		folder = './converted/' + pathlib.Path(file).stem
 
 		if not os.path.exists(folder):
 			os.makedirs(folder)
@@ -36,7 +39,7 @@ try:
 					rownum = rownum + 1
 					
 				
-				service = build('youtube', 'v3', developerKey='AIzaSyDvYRoF6kVF3vChT5Z0N0XOSAtwMj_f1j4')
+				service = build('youtube', 'v3', developerKey=configs['developerKey'])
 				dataX = service.videos().list(part='snippet', id=row[0]).execute()
 				service.close()
 				
