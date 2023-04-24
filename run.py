@@ -58,7 +58,10 @@ try:
 				else:
 					rownum = rownum + 1
 				
-				if rownum > 2:
+				if rownum == configs['conversionMax']:
+					print('Reached conversion max')
+					continue
+				if rownum > configs['conversionMax']:
 					continue
 				
 				try:
@@ -71,7 +74,7 @@ try:
 					tmp = tmp + ' - '
 					tmp = tmp + niceslug(dataX['items'][0]['snippet']['channelTitle'])
 					
-					outname = folder  + '/' + tmp + '.url'
+					outname = folder  + '/' + tmp + ' - youtube.url'
 				except Exception as e:
 					print('Skipping', row[0])
 					continue
