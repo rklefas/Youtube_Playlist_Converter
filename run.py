@@ -6,13 +6,33 @@ import os
 from googleapiclient.discovery import build
 from slugify import slugify
 import json
+import filedate
 
+
+def niceslug(tmp):
+	tmp = tmp.replace('\'', '')
+	tmp = slugify(tmp)
+	tmp = tmp.replace('-', ' ')
+
+	return tmp
+
+
+def finished(msg, countdown):
+	print(msg)
+	
+	for ix in range(0, countdown):
+		print('.' * (countdown - ix))
+		sleep(1)
+
+
+finished('Starting', 5)
 
 try:
 
 	configs = json.load(open('./config.json', 'r'))
 
 	for file in glob.glob(".\YouTube and YouTube Music\playlists\*.csv"):
+	
 		print('')
 		print('PLAYLIST', file)
 		print('')
@@ -37,35 +57,49 @@ try:
 					continue
 				else:
 					rownum = rownum + 1
-					
 				
-				service = build('youtube', 'v3', developerKey=configs['developerKey'])
-				dataX = service.videos().list(part='snippet', id=row[0]).execute()
-				service.close()
+				if rownum > 2:
+					continue
 				
 				try:
-					tmp = slugify(dataX['items'][0]['snippet']['title']).replace('-', ' ')
+					# cache the data here...
+					service = build('youtube', 'v3', developerKey=configs['developerKey'])
+					dataX = service.videos().list(part='snippet', id=row[0]).execute()
+					service.close()
+					
+					tmp = niceslug(dataX['items'][0]['snippet']['title'])
 					tmp = tmp + ' - '
-					tmp = tmp + slugify(dataX['items'][0]['snippet']['channelTitle']).replace('-', ' ')
+					tmp = tmp + niceslug(dataX['items'][0]['snippet']['channelTitle'])
+					
 					outname = folder  + '/' + tmp + '.url'
 				except Exception as e:
-					outname = folder  + '/VIDEO ' + row[0] + '.url'
+					print('Skipping', row[0])
+					continue
 					
 				if os.path.isfile(outname):
 				
-					print('Found', outname)
+					print('Found', rownum, outname)
 				else:
 				
 					with open('template.url', 'r') as file:
 						data = file.read()
 						
 					data = data.replace('[id]', str(row[0]))
+					data = data + "DateModified=" + row[1]
 
 					text_file = open(outname, "w")
 					text_file.write(data)
 					text_file.close()
+					
+					filedate.File(outname).set(
+						created = row[1],
+						modified = row[1]
+					)
 
-					print('Created', outname)
+					print('Created', rownum, outname)
 
 except Exception as e:
 	raise Exception(e)
+
+
+finished('All done', 10)
