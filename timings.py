@@ -4,6 +4,8 @@ import json
 import sys
 from googleapiclient.discovery import build
 import configparser
+import filedate
+
 
 def finished(msg, countdown):
 	print(msg)
@@ -78,13 +80,18 @@ for file in fileglob:
 		padding = 'S' * duration.get('seconds')
 		padding = padding + 'M' * (duration.get('minutes') * 60)
 		padding = padding + 'H' * (duration.get('hours') * 3600)
-		# padding = padding * 16
+		padding = padding * 16
 		inifile['InternetShortcut']['size_padding'] = padding
 
 		print('  Time', inifile['InternetShortcut']['length'])
 		
 		with open(file, 'w') as configfile:
 			inifile.write(configfile)
+			
+		filedate.File(file).set(
+			created = inifile['InternetShortcut']['DateModified'],
+			modified = inifile['InternetShortcut']['DateModified']
+		)
 			
 			
 	except Exception as e:
