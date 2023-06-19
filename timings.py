@@ -55,12 +55,19 @@ sleep(5)
 
 for file in fileglob:
 
-	print('Open', file)
 	
 	inifile = configparser.ConfigParser()
 	inifile.read(file)
 
+	if inifile['InternetShortcut'].get('length'):
+		print('Length found')
+		continue
+		
+	print('Open', file)
+	
 	try:
+		
+		
 		
 		justid = inifile['InternetShortcut']['url']
 		justid = justid.replace('https://www.youtube.com/watch?v=', '')
@@ -103,4 +110,4 @@ for file in fileglob:
 
 
 
-finished('Done', 5)
+input('Enter to exit')
